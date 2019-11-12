@@ -26,7 +26,7 @@ def seConnecter( matricule , mdp ) :
 	try :
 		curseur = getConnexionBD().cursor()
 		requete = '''
-					select vis_nom , vis_prenom
+					select vis_nom , vis_prenom, vis_mdp
 					from Visiteur
 					inner join Travailler as t1
 					on t1.vis_matricule = Visiteur.vis_matricule
@@ -42,15 +42,17 @@ def seConnecter( matricule , mdp ) :
 		curseur.execute( requete , ( matricule , ) )
 		
 		enregistrement = curseur.fetchone()
-		
-		visiteur = {}
-		if enregistrement != None :
-			visiteur[ 'vis_matricule' ] = matricule
-			visiteur[ 'vis_nom' ] = enregistrement[ 0 ]
-			visiteur[ 'vis_prenom' ] = enregistrement[ 1 ]
+
+		if (enregistrement[2] == mdp) :
+			visiteur = {}
+			if enregistrement != None :
+				visiteur[ 'vis_matricule' ] = matricule
+				visiteur[ 'vis_nom' ] = enregistrement[ 0 ]
+				visiteur[ 'vis_prenom' ] = enregistrement[ 1 ]
 			
-		curseur.close()
-		return visiteur
+			curseur.close()
+			return visiteur
+		return None;
 		
 	except :
 		return None
@@ -63,11 +65,16 @@ def getRapportsVisite( matricule , mois , annee ) :
 						rv.rap_num ,
 						rv.rap_date_visite ,
 						rv.rap_bilan ,
+						rv.rap_date_saisie ,
+						rv.rap_coef_confiance ,
 						p.pra_nom ,
 						p.pra_prenom ,
 						p.pra_cp ,
-						p.pra_ville
-					from RapportVisite as rv
+						p.pra_ville,
+						m.mot_libelle
+					from Motif m 
+					inner join RapportVisite as rv
+					on rv.mot_code = m.mot_code
 					inner join Praticien as p
 					on p.pra_num = rv.pra_num
 					where rv.vis_matricule = %s
@@ -86,10 +93,13 @@ def getRapportsVisite( matricule , mois , annee ) :
 			unRapport[ 'rap_num' ] = unEnregistrement[ 0 ]
 			unRapport[ 'rap_date_visite' ] = '%04d-%02d-%02d' % ( unEnregistrement[ 1 ].year , unEnregistrement[ 1 ].month , unEnregistrement[ 1 ].day )
 			unRapport[ 'rap_bilan' ] = unEnregistrement[ 2 ]
-			unRapport[ 'pra_nom' ] = unEnregistrement[ 3 ]
-			unRapport[ 'pra_prenom' ] = unEnregistrement[ 4 ]
-			unRapport[ 'pra_cp' ] = unEnregistrement[ 5 ]
-			unRapport[ 'pra_ville' ] = unEnregistrement[ 5 ]
+			unRapport[ 'rap_date_saisie' ] = '%04d-%02d-%02d' % ( unEnregistrement[ 3 ].year , unEnregistrement[ 3 ].month , unEnregistrement[ 3 ].day )
+			unRapport[ 'rap_coef_confiance' ] = unEnregistrement[ 4 ]
+			unRapport[ 'pra_nom' ] = unEnregistrement[ 5 ]
+			unRapport[ 'pra_prenom' ] = unEnregistrement[ 6 ]
+			unRapport[ 'pra_cp' ] = unEnregistrement[ 7 ]
+			unRapport[ 'pra_ville' ] = unEnregistrement[ 8 ]
+			unRapport[ 'mot_libelle' ] = unEnregistrement[ 9 ]
 			rapports.append( unRapport )
 			
 		curseur.close()
@@ -213,7 +223,7 @@ def genererNumeroRapportVisite( matricule ) :
 		return None
 
 
-def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan ) :
+def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan , dateSaisie, coefConfiance, motif) :
 	
 	numRapportVisite = genererNumeroRapportVisite( matricule )
 	
@@ -223,11 +233,11 @@ def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan ) :
 			curseur = getConnexionBD().cursor()
 
 			requete = '''
-				insert into RapportVisite( vis_matricule , rap_num , rap_date_visite , rap_bilan , pra_num )
-				values( %s , %s , %s , %s , %s )
+				insert into RapportVisite( vis_matricule , rap_num , rap_bilan, rap_date_visite , rap_date_saisie, rap_coef_confiance, pra_num, mot_code)
+				values( %s , %s , %s , %s , %s , %s, %s, %s)
 				'''
 
-			curseur.execute( requete, ( matricule , numRapportVisite , dateVisite , bilan , numPraticien ) )
+			curseur.execute( requete, ( matricule , numRapportVisite , bilan , dateVisite , dateSaisie, coefConfiance, numPraticien, motif) )
 			connexionBD.commit()
 			curseur.close()
 

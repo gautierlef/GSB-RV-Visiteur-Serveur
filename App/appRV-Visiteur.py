@@ -83,13 +83,29 @@ def getMedicaments() :
 		reponse.status_code = 404
 	return reponse
 	
+@app.route( '/motifs', methods = [ 'GET' ] )
+def getMotifs() :
+	motifs = modeleGSBRV.getMotifs()
+	if motifs != None :
+		reponse = make_response( json.dumps( motifs ) )
+		reponse.mimetype = 'application/json'
+		reponse.status_code = 200
+	else :
+		reponse = make_response( '' )
+		reponse.mimetype = 'application/json'
+		reponse.status_code = 404
+	return reponse
+	
 @app.route( '/rapports' , methods = [ 'POST' ] )
 def addRapportVisite() :
 	unRapport = json.loads( request.data )
 	numRapport = modeleGSBRV.enregistrerRapportVisite( 	unRapport[ 'matricule' ] , 
 																unRapport[ 'praticien' ] ,
 																unRapport[ 'visite' ] ,
-																unRapport[ 'bilan' ] )
+																unRapport[ 'bilan' ],
+																unRapport[ 'date_saisie' ],
+																unRapport[ 'coef_confiance' ],
+																unRapport[ 'motif' ])
 	
 	reponse = make_response( '' )												
 	if numRapport != None :
