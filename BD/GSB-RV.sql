@@ -282,14 +282,14 @@ INSERT INTO Motif VALUES
 	('M1', 'Visite périodique', NULL),
 	('M2', 'Nouveautés', NULL),
 	('M3', 'Sollicitation', NULL),
-	('A1', 'Autre', 'Attaque de pélicans mécaniques en rût zombies carnivores');
+	('A1', 'Autre', 'Attaque de pélicans mécaniques');
 
 CREATE TABLE RapportVisite (
   vis_matricule varchar(20) NOT NULL DEFAULT '',
   rap_num int(11) NOT NULL DEFAULT '0',
   rap_date_visite date NOT NULL,
   rap_bilan varchar(510) DEFAULT '',
-  rap_date_saisie date NOT NULL,
+  rap_date_saisie date,
   rap_coef_confiance int NOT NULL,
   mot_code varchar(20) NOT NULL,
   pra_num int(11) NOT NULL DEFAULT '0',

@@ -3,7 +3,7 @@
 
 
 import mysql.connector
-
+from datetime import date
 
 connexionBD = None
 
@@ -194,8 +194,31 @@ def getMedicaments() :
 	except :
 		return None
 
-
-	
+def getMotifs() :
+	try :
+		curseur = getConnexionBD().cursor()
+		requete = '''
+					select mot_code, mot_libelle , mot_precision 
+					from Motif
+				'''
+		
+		curseur.execute( requete , () )
+		
+		enregistrements = curseur.fetchall()
+		
+		motifs = []
+		for unEnregistrement in enregistrements :
+			unMotif = {}
+			unMotif[ 'mot_code' ] = unEnregistrement[ 0 ]
+			unMotif[ 'mot_libelle' ] = unEnregistrement[ 1 ]
+			unMotif[ 'mot_precision' ] = unEnregistrement[ 2 ]
+			motifs.append( unMotif )
+			
+		curseur.close()
+		return motifs
+		
+	except :
+		return None
 
 def genererNumeroRapportVisite( matricule ) :
 	
@@ -223,7 +246,7 @@ def genererNumeroRapportVisite( matricule ) :
 		return None
 
 
-def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan , dateSaisie, coefConfiance, motif) :
+def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan , coefConfiance, motif) :
 	
 	numRapportVisite = genererNumeroRapportVisite( matricule )
 	
@@ -237,7 +260,7 @@ def enregistrerRapportVisite( matricule , numPraticien , dateVisite , bilan , da
 				values( %s , %s , %s , %s , %s , %s, %s, %s)
 				'''
 
-			curseur.execute( requete, ( matricule , numRapportVisite , bilan , dateVisite , dateSaisie, coefConfiance, numPraticien, motif) )
+			curseur.execute( requete, ( matricule , numRapportVisite , bilan , dateVisite , date.today(), coefConfiance, numPraticien, motif) )
 			connexionBD.commit()
 			curseur.close()
 

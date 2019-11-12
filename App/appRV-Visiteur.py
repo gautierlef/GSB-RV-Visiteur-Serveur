@@ -103,7 +103,6 @@ def addRapportVisite() :
 																unRapport[ 'praticien' ] ,
 																unRapport[ 'visite' ] ,
 																unRapport[ 'bilan' ],
-																unRapport[ 'date_saisie' ],
 																unRapport[ 'coef_confiance' ],
 																unRapport[ 'motif' ])
 	
