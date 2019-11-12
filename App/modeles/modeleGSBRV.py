@@ -52,7 +52,8 @@ def seConnecter( matricule , mdp ) :
 			
 			curseur.close()
 			return visiteur
-		return None;
+		else :
+			return {};
 		
 	except :
 		return None
